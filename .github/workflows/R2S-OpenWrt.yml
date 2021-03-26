@@ -1,6 +1,7 @@
 name: R2S-OpenWrt
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: 5 6 * * 0
   watch:
@@ -141,5 +142,5 @@ jobs:
         tag: 2102
         commit: master
         replacesArtifacts: true
-        token: ${{ secrets.workflow_token }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ./artifact/*.zip
