@@ -10,8 +10,8 @@ uci set system.@system[0].zonename=Asia/Shanghai
 uci commit system
 
 #SSRP
-uci set shadowsocksr.@global[0].gfwlist_url='https://raw.sevencdn.com/Loyalsoldier/v2ray-rules-dat/release/gfw.txt'
-uci set shadowsocksr.@global[0].chnroute_url='https://raw.sevencdn.com/QiuSimons/Chnroute/master/dist/chnroute/chnroute.txt'
+uci set shadowsocksr.@global[0].gfwlist_url='https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/gfw.txt'
+uci set shadowsocksr.@global[0].chnroute_url='https://cdn.jsdelivr.net/gh/QiuSimons/Chnroute@master/dist/chnroute/chnroute.txt'
 uci commit shadowsocksr
 
 #Feeds 更换镜像源
@@ -75,12 +75,19 @@ opkg flag hold dnsmasq-full
 #清理内存缓存
 #sync; echo 3 > /proc/sys/vm/drop_caches
 
-#清除 LuCI 残留缓存
-rm -rf /tmp/luci-modulecache
-rm -f /tmp/luci-indexcache
-
 #默认关闭 Shortcut-FE
 service shortcut-fe stop
 rm -rf /etc/rc.d/S90shortcut-fe
+
+#自用
+rm -f /etc/rpcd_10_system.js
+rm -f /www/luci-static/resources/view/status/include/10_system.js
+cp -f /rom/etc/rpcd_10_system.js /www/luci-static/resources/view/status/include/10_system.js
+[ -f '/etc/fucked' ] && sed -i '/Source Code/d' /www/luci-static/resources/view/status/include/10_system.js
+touch /etc/fucked
+
+#清除 LuCI 残留缓存
+rm -rf /tmp/luci-modulecache
+rm -f /tmp/luci-indexcache
 
 exit 0

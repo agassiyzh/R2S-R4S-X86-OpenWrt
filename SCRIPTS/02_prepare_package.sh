@@ -57,6 +57,7 @@ cp -f ../PATCH/duplicate/shortcut-fe ./package/base-files/files/etc/init.d
 ### 获取额外的基础软件包 ###
 # AutoCore
 svn co https://github.com/immortalwrt/immortalwrt/branches/master/package/lean/autocore package/lean/autocore
+#wget -qO - https://github.com/immortalwrt/immortalwrt/commit/13d6e338f1f7eba45e1aada749ac74fc391b9216.patch | patch -Rp1
 rm -rf ./feeds/packages/utils/coremark
 svn co https://github.com/immortalwrt/packages/trunk/utils/coremark feeds/packages/utils/coremark
 # 更换 Nodejs 版本
@@ -110,7 +111,7 @@ svn co https://github.com/QiuSimons/OpenWrt_luci-app/trunk/lean/luci-app-arpbind
 svn co https://github.com/coolsnowwolf/lede/trunk/package/lean/luci-app-autoreboot package/lean/luci-app-autoreboot
 # Boost 通用即插即用
 svn co https://github.com/ryohuang/slim-wrt/trunk/slimapps/application/luci-app-boostupnp package/new/luci-app-boostupnp
-sed -i 's,https://api.ipify.org,http://members.3322.org/dyndns/getip,g' ./package/new/luci-app-boostupnp/root/usr/sbin/boostupnp.sh
+sed -i 's,api.ipify.org,myip.ipip.net/s,g' ./package/new/luci-app-boostupnp/root/usr/sbin/boostupnp.sh
 # ChinaDNS
 git clone -b luci --depth 1 https://github.com/pexcn/openwrt-chinadns-ng.git package/new/luci-app-chinadns-ng
 svn co https://github.com/xiaorouji/openwrt-passwall/trunk/chinadns-ng package/new/chinadns-ng
@@ -133,15 +134,13 @@ svn co https://github.com/immortalwrt/packages/trunk/utils/cpulimit package/lean
 #svn co https://github.com/coolsnowwolf/lede/trunk/package/lean/ddns-scripts_aliyun package/lean/ddns-scripts_aliyun
 #svn co https://github.com/coolsnowwolf/lede/trunk/package/lean/ddns-scripts_dnspod package/lean/ddns-scripts_dnspod
 git clone --depth 1 https://github.com/small-5/ddns-scripts-dnspod package/lean/ddns-scripts_dnspod
-git clone --depth 1 https://github.com/sensec/ddns-scripts_aliyun package/lean/ddns-scripts_aliyun
+git clone --depth 1 https://github.com/small-5/ddns-scripts-aliyun package/lean/ddns-scripts_aliyun
 svn co https://github.com/openwrt/packages/branches/openwrt-18.06/net/ddns-scripts feeds/packages/net/ddns-scripts
 svn co https://github.com/openwrt/luci/branches/openwrt-18.06/applications/luci-app-ddns feeds/luci/applications/luci-app-ddns
 svn co https://github.com/QiuSimons/OpenWrt_luci-app/trunk/others/luci-app-tencentddns package/lean/luci-app-tencentddns
 svn co https://github.com/kenzok8/openwrt-packages/trunk/luci-app-aliddns package/new/luci-app-aliddns
 # Docker 容器（会导致 OpenWrt 出现 UDP 转发问题，慎用）
-#sed -i 's/+docker/+docker \\\n\t+dockerd/g' ./feeds/luci/applications/luci-app-dockerman/Makefile
-rm -rf ./feeds/luci/applications/luci-app-dockerman
-cp -rf ../openwrt-lienol/package/diy/luci-app-dockerman ./feeds/luci/applications/luci-app-dockerman
+sed -i 's/+docker/+docker \\\n\t+dockerd/g' ./feeds/luci/applications/luci-app-dockerman/Makefile
 # Edge 主题
 git clone -b master --depth 1 https://github.com/garypang13/luci-theme-edge.git package/new/luci-theme-edge
 # FRP 内网穿透
@@ -210,8 +209,8 @@ svn co https://github.com/xiaorouji/openwrt-passwall/trunk/v2ray-plugin package/
 svn co https://github.com/xiaorouji/openwrt-passwall/trunk/xray-plugin package/new/xray-plugin
 # qBittorrent 下载
 svn co https://github.com/garypang13/openwrt-static-qb/trunk/qBittorrent-Enhanced-Edition package/lean/qBittorrent-Enhanced-Edition
-svn co https://github.com/coolsnowwolf/lede/trunk/package/lean/luci-app-qbittorrent package/lean/luci-app-qbittorrent
-sed -i 's/+qBittorrent +python3/+qBittorrent-Enhanced-Edition/g' package/lean/luci-app-qbittorrent/Makefile
+sed -i 's/4.3.3.10/4.3.4.10/g' package/lean/qBittorrent-Enhanced-Edition/Makefile
+svn co https://github.com/immortalwrt/immortalwrt/branches/master/package/lean/luci-app-qbittorrent package/lean/luci-app-qbittorrent
 # 清理内存
 svn co https://github.com/coolsnowwolf/lede/trunk/package/lean/luci-app-ramfree package/lean/luci-app-ramfree
 # ServerChan 微信推送
@@ -222,20 +221,23 @@ mkdir package/new/smartdns
 wget -P package/new/smartdns/ https://github.com/HiGarfield/lede-17.01.4-Mod/raw/master/package/extra/smartdns/Makefile
 sed -i 's,files/etc/config,$(PKG_BUILD_DIR)/package/openwrt/files/etc/config,g' ./package/new/smartdns/Makefile
 rm -rf ./feeds/luci/applications/luci-app-smartdns
-svn co https://github.com/immortalwrt/immortalwrt/branches/openwrt-18.06-k5.4/package/ntlf9t/luci-app-smartdns package/new/luci-app-smartdns
+svn co https://github.com/immortalwrt/luci/branches/openwrt-18.06/applications/luci-app-smartdns feeds/luci/applications/luci-app-smartdns
 # ShadowsocksR Plus+
 svn co https://github.com/fw876/helloworld/trunk/luci-app-ssr-plus package/lean/luci-app-ssr-plus
 rm -rf ./package/lean/luci-app-ssr-plus/po/zh_Hans
 pushd package/lean
 #wget -qO - https://patch-diff.githubusercontent.com/raw/fw876/helloworld/pull/442.patch | patch -p1
 popd
-sed -i 's,default n,default y,g' package/lean/luci-app-ssr-plus/Makefile
-sed -i 's,Xray:xray ,Xray:xray-core ,g' package/lean/luci-app-ssr-plus/Makefile
-sed -i '/V2ray:v2ray/d' package/lean/luci-app-ssr-plus/Makefile
-sed -i '/plugin:v2ray/d' package/lean/luci-app-ssr-plus/Makefile
-#sed -i '/result.encrypt_method/a\result.fast_open = "1"' package/lean/luci-app-ssr-plus/root/usr/share/shadowsocksr/subscribe.lua
-sed -i 's,ispip.clang.cn/all_cn.txt,raw.sevencdn.com/QiuSimons/Chnroute/master/dist/chnroute/chnroute.txt,g' package/lean/luci-app-ssr-plus/root/etc/init.d/shadowsocksr
-sed -i 's,YW5vbnltb3Vz/domain-list-community/release/gfwlist.txt,Loyalsoldier/v2ray-rules-dat/release/gfw.txt,g' package/lean/luci-app-ssr-plus/root/etc/init.d/shadowsocksr
+pushd package/lean/luci-app-ssr-plus
+sed -i 's,default n,default y,g' Makefile
+sed -i 's,Xray:xray ,Xray:xray-core ,g' Makefile
+sed -i '/V2ray:v2ray/d' Makefile
+sed -i '/plugin:v2ray/d' Makefile
+#sed -i '/result.encrypt_method/a\result.fast_open = "1"' root/usr/share/shadowsocksr/subscribe.lua
+sed -i 's,ispip.clang.cn/all_cn,cdn.jsdelivr.net/gh/QiuSimons/Chnroute@master/dist/chnroute/chnroute,' root/etc/init.d/shadowsocksr
+sed -i 's,ghproxy.com/https://raw.githubusercontent.com/YW5vbnltb3Vz/domain-list-community/release/gfwlist,cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/gfw,' root/etc/init.d/shadowsocksr luasrc/model/cbi/shadowsocksr/advanced.lua
+sed -i '/Clang.CN.CIDR/a\o:value("https://cdn.jsdelivr.net/gh/QiuSimons/Chnroute@master/dist/chnroute/chnroute.txt", translate("QiuSimons/Chnroute"))' luasrc/model/cbi/shadowsocksr/advanced.lua
+popd
 # ShadowsocksR Plus+ 依赖
 rm -rf ./feeds/packages/net/kcptun
 rm -rf ./feeds/packages/net/proxychains-ng
