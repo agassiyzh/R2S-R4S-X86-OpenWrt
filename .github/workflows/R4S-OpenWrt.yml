@@ -1,6 +1,8 @@
 name: R4S-OpenWrt
 
 on:
+#  schedule:
+#    - cron: 5 6 * * 0
   watch:
     types: started
 
@@ -85,12 +87,12 @@ jobs:
       run: |
         df -h
         cd openwrt
-        make download -j10
+        make download -j50
     - name: Make Toolchain
       run: |
         df -h
         cd openwrt
-        let make_process=$(nproc)+1
+        let make_process=$(nproc)+2
         make toolchain/install -j${make_process} V=s
     - name: Compile Openwrt
       id: compileopenwrt
@@ -98,7 +100,7 @@ jobs:
       run: |
         df -h
         cd openwrt
-        let Make_Process=$(nproc)+1
+        let Make_Process=$(nproc)+2
         make -j${Make_Process} V=w
         echo $?
     - name: If Error
@@ -134,9 +136,9 @@ jobs:
       id: create_release
       uses: ncipollo/release-action@v1.8.0
       with:
-        name: OpenWRT-R2S-R4S-X86-21.02
+        name: OpenWRT-R2S-R4S-X86-21.02.0-RC1
         allowUpdates: true
-        tag: 2102
+        tag: 21.02.0-rc1
         commit: master
         replacesArtifacts: true
         token: ${{ secrets.workflow_token }}
