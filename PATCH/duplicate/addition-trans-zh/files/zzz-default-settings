@@ -26,7 +26,7 @@ uci commit uhttpd
 
 #在防火墙默认开启全锥形 NAT 以及 Flow Offloading
 uci set firewall.@defaults[0].fullcone='1'
-uci set firewall.@defaults[0].flow_offloading='1'
+#uci set firewall.@defaults[0].flow_offloading='1'
 uci commit firewall
 
 #默认开启 Packet Steering
@@ -43,6 +43,7 @@ uci commit upnpd
 
 #网易云音乐
 #echo "59.111.239.62 httpdns.n.netease.com" >> /etc/hosts && cat /etc/hosts | sort | uniq > /tmp/tmp_hosts && cat /tmp/tmp_hosts > /etc/hosts
+echo "10 2 * * * cd /usr/share/unblockneteasemusic/core/ && openssl req -new -x509 -key server.key -out server.crt -days 3650  -subj "/CN=*.music.163.com" && cd" >> /etc/crontabs/root && cat /etc/crontabs/root | sort | uniq > /tmp/tmp_cron_root && cat /tmp/tmp_cron_root > /etc/crontabs/root
 
 #OpenClash 设置
 echo "/etc/openclash/" >> /etc/sysupgrade.conf && cat /etc/sysupgrade.conf | sort | uniq > /tmp/tmp_sysupgrade_conf && cat /tmp/tmp_sysupgrade_conf > /etc/sysupgrade.conf
@@ -58,10 +59,16 @@ uci set dhcp.lan.ra='hybrid'
 uci set dhcp.lan.ndp='hybrid'
 uci set dhcp.lan.dhcpv6='hybrid'
 uci set dhcp.lan.ra_management='1'
-uci del dhcp.@dnsmasq[0].rebind_protection='1'
+uci del dhcp.@dnsmasq[0].rebind_protection
+uci del dhcp.@dnsmasq[0].filteraaaa
 uci commit dhcp
 sed -i '/log-facility/d' /etc/dnsmasq.conf
 echo "log-facility=/dev/null" >> /etc/dnsmasq.conf
+
+#计划任务
+uci set system.@system[0].cronloglevel="9"
+uci commit system
+/etc/init.d/cron restart
 
 #软链接
 ln -sf /sbin/ip /usr/bin/ip
@@ -76,8 +83,8 @@ opkg flag hold dnsmasq-full
 #sync; echo 3 > /proc/sys/vm/drop_caches
 
 #默认关闭 Shortcut-FE
-service shortcut-fe stop
-rm -rf /etc/rc.d/S90shortcut-fe
+#service shortcut-fe stop
+#rm -rf /etc/rc.d/S90shortcut-fe
 
 #自用
 [ -f '/rom/etc/rpcd_10_system.js' ] && rm -f /etc/rpcd_10_system.js

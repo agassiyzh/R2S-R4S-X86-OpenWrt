@@ -16,6 +16,7 @@ CONFIG_TOOLCHAINOPTS=y
 CONFIG_GCC_USE_VERSION_9=y
 
 ### BASIC ###
+CONFIG_PACKAGE_r8169-firmware=y
 CONFIG_PACKAGE_addition-trans-zh=y
 CONFIG_PACKAGE_arm-trusted-firmware-rockchip=y
 CONFIG_PACKAGE_autocore-arm=y
@@ -59,6 +60,8 @@ CONFIG_PACKAGE_rpcd-mod-rrdns=y
 CONFIG_PACKAGE_uhttpd=y
 CONFIG_PACKAGE_wget-ssl=y
 CONFIG_PACKAGE_lua=y
+# CONFIG_PACKAGE_miniupnpd is not set
+CONFIG_PACKAGE_miniupnpd-igdv1=y
 
 ### LUCI ###
 CONFIG_LUCI_LANG_zh_Hans=y
