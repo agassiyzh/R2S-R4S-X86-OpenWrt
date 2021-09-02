@@ -50,7 +50,7 @@ jobs:
         df -h
     - name: Prepare Mixedwrt
       run: |
-        sudo chown -R runner:runner /home/runner/work/R2S-R4S-X86-OpenWrt
+        sudo chown -R runner:runner /home/runner/work/YAOF
         cp -r ./SCRIPTS/R2S/. ./SCRIPTS/
         cp -r ./SCRIPTS/. ./
         /bin/bash 01_get_ready.sh
@@ -94,7 +94,7 @@ jobs:
         df -h
         cd openwrt
         let make_process=$(nproc)+2
-        make toolchain/install -j${make_process} V=s
+        make toolchain/install -j${make_process} || make toolchain/install -j${make_process} V=s
     - name: Compile Openwrt
       id: compileopenwrt
       continue-on-error: true
@@ -102,7 +102,7 @@ jobs:
         df -h
         cd openwrt
         let Make_Process=$(nproc)+2
-        make -j${Make_Process} V=w
+        make -j${Make_Process} || make -j${Make_Process} V=s
         echo $?
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
@@ -137,9 +137,9 @@ jobs:
       id: create_release
       uses: ncipollo/release-action@v1.8.0
       with:
-        name: OpenWRT-R2S-R4S-X86-21.02.0-RC4
+        name: OpenWRT-21.02.0
         allowUpdates: true
-        tag: 21.02.0-rc4
+        tag: 21.02.0
         commit: master
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
