@@ -44,6 +44,7 @@ jobs:
         sudo -E apt-get update -y
         sudo -E apt-get install -y build-essential rsync asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core p7zip p7zip-full msmtp libssl-dev texinfo libreadline-dev libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint ccache curl wget vim nano python3 python3-pip python3-ply haveged lrzsz device-tree-compiler scons
         wget -qO - https://raw.githubusercontent.com/friendlyarm/build-env-on-ubuntu-bionic/master/install.sh | sed 's/python-/python3-/g' | /bin/bash
+        pip3 install pyelftools
         sudo -E apt-get clean -y
         git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
         df -h
@@ -59,6 +60,7 @@ jobs:
         cp -r ../SCRIPTS/. ./
         /bin/bash 02_prepare_package.sh
         /bin/bash 02_target_only.sh
+        /bin/bash 04_remove_upx.sh
     - name: Convert Translation
       run: |
         cd openwrt
@@ -71,37 +73,33 @@ jobs:
       run: |
         cd openwrt
         mv ../SEED/X86/config.seed .config
+        #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config
         make defconfig
-
-    - name: Smart chmod
+    - name: Get Architecture
+      working-directory: ${{ github.workspace }}/openwrt
       run: |
-        MY_Filter=$(mktemp)
-        echo '/\.git' >  ${MY_Filter}
-        echo '/\.svn' >> ${MY_Filter}
-        find ./ -maxdepth 1 | grep -v '\./$' | grep -v '/\.git' | xargs -s1024 chmod -R u=rwX,og=rX
-        find ./ -type f | grep -v -f ${MY_Filter} | xargs -s1024 file | grep 'executable\|ELF' | cut -d ':' -f1 | xargs -s1024 chmod 755
-        rm -f ${MY_Filter}
-        unset MY_Filter
-
+        TARGET_DEVICE_ARCH="$(grep "^CONFIG_TARGET_.*_.*=y$" ".config" | head -n 1 | sed 's/^CONFIG_TARGET_//g' | awk -F '_' '{print $1}')"
+        echo "TARGET_DEVICE_ARCH=${TARGET_DEVICE_ARCH}-" >>$GITHUB_ENV
+        latest_release="$(curl -s https://github.com/openwrt/openwrt/tags | grep -Eo "v[0-9\.]+\-*r*c*[0-9]*.tar.gz" | sed -n '/[2-9][0-9]/p' | sed -n 1p | sed 's/.tar.gz//g' | sed 's/v//g')"
+        echo "latest_release=${latest_release}" >>$GITHUB_ENV
+    - name: Cache
+      uses: klever1988/cachewrtbuild@test
+      with:
+        ccache: 'true'
+        mixkey: ${{ env.TARGET_DEVICE_ARCH }}
+        prefix: ${{ github.workspace }}/openwrt
     - name: Make Download
       run: |
         df -h
         cd openwrt
         make download -j50
-    - name: Make Toolchain
-      run: |
-        df -h
-        cd openwrt
-        let make_process=$(nproc)+2
-        make toolchain/install -j${make_process} || make toolchain/install -j${make_process} V=s
     - name: Compile Openwrt
       id: compileopenwrt
       continue-on-error: true
       run: |
         df -h
         cd openwrt
-        let Make_Process=$(nproc)+2
-        make -j${Make_Process} || make -j${Make_Process} V=s
+        make -j$(($(nproc) + 1)) || make -j$(($(nproc) + 1)) V=s
         echo $?
     - name: If Error
       if: steps.compileopenwrt.outcome == 'failure'
@@ -116,29 +114,29 @@ jobs:
       run: |
         rm -rf ./artifact/
         mkdir -p ./artifact/
-        mv openwrt/bin/targets/x86/64/*combined.img* ./artifact/
+        mv openwrt/bin/targets/x86/64/*combined-efi.img* ./artifact/
         cd ./artifact/
         ls -Ahl
         gzip -d *.gz && exit 0
         gzip --best *.img
         ls -Ahl
-        sha256sum openwrt*x86* | tee X86-GC404-$(date +%Y-%m-%d)-21.02.sha256sum
-        zip X86-GC404-$(date +%Y-%m-%d)-21.02-ext4.zip *ext4-combined*
-        zip X86-GC404-$(date +%Y-%m-%d)-21.02-sfs.zip *squashfs-combined*
+        sha256sum openwrt*x86* | tee X86-GC404-$(date +%Y-%m-%d)-${{ env.latest_release }}.sha256sum
+        zip X86-GC404-Docker-$(date +%Y-%m-%d)-${{ env.latest_release }}-ext4.zip *ext4-combined*
+        zip X86-GC404-Docker-$(date +%Y-%m-%d)-${{ env.latest_release }}-sfs.zip *squashfs-combined*
         ls -Ahl
     - name: Upload artifact
       uses: actions/upload-artifact@main
       with:
-        name: OpenWRT_21.02
+        name: OpenWRT_${{ env.latest_release }}
         path: ./artifact/
 
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1.8.0
       with:
-        name: OpenWRT-21.02.0
+        name: OpenWRT-${{ env.latest_release }}
         allowUpdates: true
-        tag: 21.02.0
+        tag: ${{ env.latest_release }}
         commit: master
         replacesArtifacts: true
         token: ${{ secrets.workflow_token }}
