@@ -114,6 +114,7 @@ sed -i 's,noinitrd,noinitrd mitigations=off,g' target/linux/x86/image/grub-iso.c
 sed -i 's,noinitrd,noinitrd mitigations=off,g' target/linux/x86/image/grub-pc.cfg
 # AutoCore
 svn export https://github.com/immortalwrt/immortalwrt/branches/openwrt-21.02/package/emortal/autocore package/lean/autocore
+sed -i 's/"getTempInfo" /"getTempInfo", "getCPUBench", "getCPUUsage" /g' package/lean/autocore/files/generic/luci-mod-status-autocore.json
 rm -rf ./feeds/packages/utils/coremark
 svn export https://github.com/immortalwrt/packages/trunk/utils/coremark feeds/packages/utils/coremark
 # DPDK
@@ -148,10 +149,13 @@ sed -i 's,kmod-usb-net-rtl8152,kmod-usb-net-rtl8152-vendor,g' target/linux/rockc
 # UPX 可执行软件压缩
 sed -i '/patchelf pkgconf/i\tools-y += ucl upx' ./tools/Makefile
 sed -i '\/autoconf\/compile :=/i\$(curdir)/upx/compile := $(curdir)/ucl/compile' ./tools/Makefile
-svn export https://github.com/immortalwrt/immortalwrt/branches/master/tools/upx tools/upx
-svn export https://github.com/immortalwrt/immortalwrt/branches/master/tools/ucl tools/ucl
+svn export https://github.com/coolsnowwolf/openwrt/branches/lede-17.01/tools/ucl tools/ucl
+svn export https://github.com/coolsnowwolf/openwrt/branches/lede-17.01/tools/upx tools/upx
 
 ### 获取额外的 LuCI 应用、主题和依赖 ###
+# 更换 golang 版本
+rm -rf ./feeds/packages/lang/golang
+svn export https://github.com/openwrt/packages/trunk/lang/golang feeds/packages/lang/golang
 # 访问控制
 svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-accesscontrol package/lean/luci-app-accesscontrol
 svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/luci-app-control-weburl package/new/luci-app-control-weburl
@@ -231,7 +235,7 @@ svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-frps
 svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-frpc package/lean/luci-app-frpc
 svn export https://github.com/coolsnowwolf/packages/trunk/net/frp package/lean/frp
 # IPSec
-svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-ipsec-vpnd package/lean/luci-app-ipsec-vpnd
+svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-ipsec-server package/lean/luci-app-ipsec-server
 # IPv6 兼容助手
 svn export https://github.com/coolsnowwolf/lede/trunk/package/lean/ipv6-helper package/lean/ipv6-helper
 # 京东签到 By Jerrykuku
@@ -266,8 +270,8 @@ svn export https://github.com/teasiu/dragino2/trunk/devices/common/diy/package/t
 svn export https://github.com/teasiu/dragino2/trunk/devices/common/diy/package/teasiu/phtunnel package/new/phtunnel
 svn export https://github.com/QiuSimons/dragino2-teasiu/trunk/package/teasiu/luci-app-oray package/new/luci-app-oray
 # Passwall
-svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-passwall package/new/luci-app-passwall
-#svn export https://github.com/xiaorouji/openwrt-passwall/trunk/luci-app-passwall package/new/luci-app-passwall
+#svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-passwall package/new/luci-app-passwall
+svn export https://github.com/xiaorouji/openwrt-passwall/branches/luci/luci-app-passwall package/new/luci-app-passwall
 pushd package/new/luci-app-passwall
 sed -i 's,default n,default y,g' Makefile
 sed -i '/trojan-go/d' Makefile
@@ -291,6 +295,21 @@ svn export https://github.com/xiaorouji/openwrt-passwall/trunk/brook package/new
 svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/trojan-plus package/new/trojan-plus
 svn export https://github.com/xiaorouji/openwrt-passwall/trunk/ssocks package/new/ssocks
 svn export https://github.com/xiaorouji/openwrt-passwall/trunk/hysteria package/new/hysteria
+# passwall2
+svn export https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/new/luci-app-passwall2
+wget -P package/new/luci-app-passwall2/ https://github.com/QiuSimons/OpenWrt-Add/raw/master/move_2_services.sh
+chmod -R 755 ./package/new/luci-app-passwall2/move_2_services.sh
+pushd package/new/luci-app-passwall2
+bash move_2_services.sh
+popd
+pushd package/new/luci-app-passwall2
+sed -i 's,default n,default y,g' Makefile
+sed -i 's,+v2ray-core ,,g' Makefile
+sed -i '/v2ray-plugin/d' Makefile
+sed -i '/shadowsocks-libev-ss-redir/d' Makefile
+sed -i '/shadowsocks-libev-ss-server/d' Makefile
+sed -i '/shadowsocks-libev-ss-local/d' Makefile
+popd
 # qBittorrent 下载
 svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-qbittorrent package/lean/luci-app-qbittorrent
 svn export https://github.com/coolsnowwolf/packages/trunk/net/qBittorrent-static package/lean/qBittorrent-static
@@ -364,9 +383,9 @@ ln -sf ../../../feeds/packages/net/v2raya ./package/feeds/packages/v2raya
 svn export https://github.com/Lienol/openwrt-package/trunk/luci-app-socat package/new/luci-app-socat
 # 订阅转换
 svn export https://github.com/immortalwrt/packages/trunk/net/subconverter feeds/packages/net/subconverter
-wget https://github.com/immortalwrt/packages/raw/88628b1/net/subconverter/Makefile -O feeds/packages/net/subconverter/Makefile
+wget https://github.com/immortalwrt/packages/raw/b7b4499/net/subconverter/Makefile -O feeds/packages/net/subconverter/Makefile
 mkdir -p ./feeds/packages/net/subconverter/patches
-wget https://github.com/immortalwrt/packages/raw/88628b1/net/subconverter/patches/100-stdcxxfs.patch -O feeds/packages/net/subconverter/patches/100-stdcxxfs.patch
+wget https://github.com/immortalwrt/packages/raw/b7b4499/net/subconverter/patches/100-stdcxxfs.patch -O feeds/packages/net/subconverter/patches/100-stdcxxfs.patch
 sed -i '\/bin\/subconverter/a\\t$(STAGING_DIR_HOST)/bin/upx --lzma --best $(1)/usr/bin/subconverter' feeds/packages/net/subconverter/Makefile
 sed -i 's,+libpcre2,+libpcre2 +libcron,g' feeds/packages/net/subconverter/Makefile
 ln -sf ../../../feeds/packages/net/subconverter ./package/feeds/packages/subconverter
@@ -375,22 +394,25 @@ ln -sf ../../../feeds/packages/libs/jpcre2 ./package/feeds/packages/jpcre2
 svn export https://github.com/immortalwrt/packages/trunk/libs/rapidjson feeds/packages/libs/rapidjson
 ln -sf ../../../feeds/packages/libs/rapidjson ./package/feeds/packages/rapidjson
 svn export https://github.com/immortalwrt/packages/trunk/libs/libcron feeds/packages/libs/libcron
+wget https://github.com/immortalwrt/packages/raw/b7b4499/libs/libcron/Makefile -O feeds/packages/libs/libcron/Makefile
 ln -sf ../../../feeds/packages/libs/libcron ./package/feeds/packages/libcron
 svn export https://github.com/immortalwrt/packages/trunk/libs/quickjspp feeds/packages/libs/quickjspp
-wget https://github.com/immortalwrt/packages/raw/297e029/libs/quickjspp/Makefile -O feeds/packages/libs/quickjspp/Makefile
+wget https://github.com/immortalwrt/packages/raw/b7b4499/libs/quickjspp/Makefile -O feeds/packages/libs/quickjspp/Makefile
 ln -sf ../../../feeds/packages/libs/quickjspp ./package/feeds/packages/quickjspp
 svn export https://github.com/immortalwrt/packages/trunk/libs/toml11 feeds/packages/libs/toml11
 ln -sf ../../../feeds/packages/libs/toml11 ./package/feeds/packages/toml11
 # 网易云音乐解锁
 # git clone --depth 1 https://github.com/immortalwrt/luci-app-unblockneteasemusic.git package/new/UnblockNeteaseMusic
+# ucode
+svn export https://github.com/openwrt/openwrt/trunk/package/utils/ucode package/utils/ucode
 # USB 打印机
-svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-usb-printer package/lean/luci-app-usb-printer
+# svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-usb-printer package/lean/luci-app-usb-printer
 # UU加速器
 svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-uugamebooster package/lean/luci-app-uugamebooster
 svn export https://github.com/coolsnowwolf/packages/trunk/net/uugamebooster package/lean/uugamebooster
 # KMS 激活助手
-svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-vlmcsd package/lean/luci-app-vlmcsd
-svn export https://github.com/coolsnowwolf/packages/trunk/net/vlmcsd package/lean/vlmcsd
+# svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-vlmcsd package/lean/luci-app-vlmcsd
+#svn export https://github.com/coolsnowwolf/packages/trunk/net/vlmcsd package/lean/vlmcsd
 # VSSR
 # git clone -b master --depth 1 https://github.com/jerrykuku/luci-app-vssr.git package/lean/luci-app-vssr
 # git clone -b master --depth 1 https://github.com/jerrykuku/lua-maxminddb.git package/lean/lua-maxminddb
