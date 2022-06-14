@@ -1,7 +1,7 @@
-From 4448478c27a6586561d93c62c81caebfba54f509 Mon Sep 17 00:00:00 2001
+From 2edb318d4d32f0bc17aead10e633a44fc965e4ff Mon Sep 17 00:00:00 2001
 From: Stephan Mueller <smueller@chronox.de>
 Date: Tue, 15 Sep 2020 22:17:43 +0200
-Subject: [PATCH v43 08/15] crypto: DRBG - externalize DRBG functions for LRNG
+Subject: [PATCH v45 06/26] crypto: DRBG - externalize DRBG functions for LRNG
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -31,7 +31,7 @@ Tested-by: Alexander Lobakin <alobakin@pm.me>
 Reviewed-by: Roman Drahtmueller <draht@schaltsekun.de>
 Tested-by: Roman Drahtmüller <draht@schaltsekun.de>
 Tested-by: Marcelo Henrique Cerri <marcelo.cerri@canonical.com>
-Tested-by: Neil Horman <nhorman@redhat.com>
+Tested-by: Neil Horman <nhorman@tuxdriver.com>
 Tested-by: Jirka Hladky <jhladky@redhat.com>
 Reviewed-by: Jirka Hladky <jhladky@redhat.com>
 Signed-off-by: Stephan Mueller <smueller@chronox.de>
@@ -76,7 +76,7 @@ Signed-off-by: Stephan Mueller <smueller@chronox.de>
  
  /*
   * FIPS 140-2 continuous self test for the noise source
-@@ -1214,7 +1216,7 @@ out:
+@@ -1226,7 +1228,7 @@ out:
  }
  
  /* Free all substructures in a DRBG state without the DRBG state structure */
@@ -85,7 +85,7 @@ Signed-off-by: Stephan Mueller <smueller@chronox.de>
  {
  	if (!drbg)
  		return;
-@@ -1235,12 +1237,13 @@ static inline void drbg_dealloc_state(st
+@@ -1247,12 +1249,13 @@ static inline void drbg_dealloc_state(st
  		drbg->fips_primed = false;
  	}
  }
@@ -100,7 +100,7 @@ Signed-off-by: Stephan Mueller <smueller@chronox.de>
  {
  	int ret = -ENOMEM;
  	unsigned int sb_size = 0;
-@@ -1321,6 +1324,7 @@ err:
+@@ -1333,6 +1336,7 @@ err:
  	drbg_dealloc_state(drbg);
  	return ret;
  }
@@ -108,7 +108,7 @@ Signed-off-by: Stephan Mueller <smueller@chronox.de>
  
  /*************************************************************************
   * DRBG interface functions
-@@ -1890,8 +1894,7 @@ out:
+@@ -1867,8 +1871,7 @@ out:
   *
   * return: flags
   */
@@ -118,7 +118,7 @@ Signed-off-by: Stephan Mueller <smueller@chronox.de>
  {
  	int i = 0;
  	size_t start = 0;
-@@ -1918,6 +1921,7 @@ static inline void drbg_convert_tfm_core
+@@ -1895,6 +1898,7 @@ static inline void drbg_convert_tfm_core
  		}
  	}
  }
@@ -128,7 +128,7 @@ Signed-off-by: Stephan Mueller <smueller@chronox.de>
  {
 --- a/include/crypto/drbg.h
 +++ b/include/crypto/drbg.h
-@@ -278,4 +278,11 @@ enum drbg_prefixes {
+@@ -282,4 +282,11 @@ enum drbg_prefixes {
  	DRBG_PREFIX3
  };
  

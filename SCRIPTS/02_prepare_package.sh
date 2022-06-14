@@ -31,7 +31,7 @@ echo "net.netfilter.nf_conntrack_helper = 1" >>./package/kernel/linux/files/sysc
 
 ### 必要的 Patches ###
 # offload bug fix
-wget -qO - https://github.com/openwrt/openwrt/pull/4849.patch | patch -p1
+#wget -qO - https://github.com/openwrt/openwrt/pull/4849.patch | patch -p1
 # TCP performance optimizations backport from linux/net-next
 #cp -rf ../PATCH/backport/TCP/* ./target/linux/generic/backport-5.10/
 # UDP performance optimizations backport from linux/net-next
@@ -60,6 +60,12 @@ wget -P target/linux/generic/hack-5.10/ https://github.com/immortalwrt/immortalw
 cp -rf ../PATCH/BBRv2/kernel/* ./target/linux/generic/hack-5.10/
 cp -rf ../PATCH/BBRv2/openwrt/package ./
 wget -qO - https://github.com/openwrt/openwrt/commit/7db9763.patch | patch -p1
+# SSL
+rm -rf ./package/libs/mbedtls
+svn export https://github.com/immortalwrt/immortalwrt/branches/master/package/libs/mbedtls package/libs/mbedtls
+rm -rf ./package/libs/openssl
+svn export https://github.com/immortalwrt/immortalwrt/branches/master/package/libs/openssl package/libs/openssl
+wget -P include/ https://github.com/immortalwrt/immortalwrt/raw/master/include/openssl-engine.mk
 
 # PRJC
 #cp -f ../PATCH/PRJC/960-prjc_v5.10-lts-r3.patch ./target/linux/generic/hack-5.10/960-prjc_v5.10-lts-r3.patch
@@ -87,13 +93,14 @@ popd
 # FW4
 mkdir package/network/config/firewall4/patches
 wget 'https://git.openwrt.org/?p=project/firewall4.git;a=patch;h=38423fae' -O package/network/config/firewall4/patches/990-unconditionally-allow-ct-status-dnat.patch
-wget -P package/network/config/firewall4/patches/ https://github.com/wongsyrone/lede-1/raw/master/package/network/config/firewall4/patches/999-01-firewall4-add-fullcone-support.patch
-sed -i 's/-1,3 +1,5/-2,3 +2,5/g' package/network/config/firewall4/patches/999-01-firewall4-add-fullcone-support.patch
+#wget -P package/network/config/firewall4/patches/ https://github.com/wongsyrone/lede-1/raw/master/package/network/config/firewall4/patches/999-01-firewall4-add-fullcone-support.patch
+#sed -i 's/-1,3 +1,5/-2,3 +2,5/g' package/network/config/firewall4/patches/999-01-firewall4-add-fullcone-support.patch
+wget -P package/network/config/firewall4/patches/ https://github.com/immortalwrt/immortalwrt/raw/master/package/network/config/firewall4/patches/001-firewall4-add-support-for-fullcone-nat.patch
 mkdir package/libs/libnftnl/patches
-wget -P package/libs/libnftnl/patches/ https://github.com/wongsyrone/lede-1/raw/master/package/libs/libnftnl/patches/999-01-libnftnl-add-fullcone-expression-support.patch
+wget -P package/libs/libnftnl/patches/ https://github.com/immortalwrt/immortalwrt/raw/master/package/libs/libnftnl/patches/001-libnftnl-add-fullcone-expression-support.patch
 sed -i '/PKG_LICENSE_FILES/a PKG_FIXUP:=autoreconf' package/libs/libnftnl/Makefile
 mkdir package/network/utils/nftables/patches
-wget -P package/network/utils/nftables/patches/ https://github.com/wongsyrone/lede-1/raw/master/package/network/utils/nftables/patches/999-01-nftables-add-fullcone-expression-support.patch
+wget -P package/network/utils/nftables/patches/ https://github.com/immortalwrt/immortalwrt/raw/master/package/network/utils/nftables/patches/002-nftables-add-fullcone-expression-support.patch
 # FW3
 mkdir package/network/config/firewall/patches
 wget -P package/network/config/firewall/patches/ https://github.com/immortalwrt/immortalwrt/raw/openwrt-21.02/package/network/config/firewall/patches/fullconenat.patch
@@ -495,27 +502,27 @@ CONFIG_RESERVE_ACTIVEFILE_KBYTES=65536
 CONFIG_RESERVE_INACTIVEFILE_TO_PREVENT_DISK_THRASHING=y
 CONFIG_RESERVE_INACTIVEFILE_KBYTES=65536
 
+CONFIG_RANDOM_DEFAULT_IMPL=y
 CONFIG_LRNG=y
-# CONFIG_LRNG_OVERSAMPLE_ENTROPY_SOURCES is not set
-CONFIG_LRNG_IRQ=y
-CONFIG_LRNG_CONTINUOUS_COMPRESSION_ENABLED=y
-# CONFIG_LRNG_CONTINUOUS_COMPRESSION_DISABLED is not set
-CONFIG_LRNG_ENABLE_CONTINUOUS_COMPRESSION=y
-# CONFIG_LRNG_SWITCHABLE_CONTINUOUS_COMPRESSION is not set
-# CONFIG_LRNG_COLLECTION_SIZE_32 is not set
-# CONFIG_LRNG_COLLECTION_SIZE_256 is not set
-# CONFIG_LRNG_COLLECTION_SIZE_512 is not set
-CONFIG_LRNG_COLLECTION_SIZE_1024=y
-# CONFIG_LRNG_COLLECTION_SIZE_2048 is not set
-# CONFIG_LRNG_COLLECTION_SIZE_4096 is not set
-# CONFIG_LRNG_COLLECTION_SIZE_8192 is not set
-CONFIG_LRNG_COLLECTION_SIZE=1024
-# CONFIG_LRNG_HEALTH_TESTS is not set
-CONFIG_LRNG_IRQ_ENTROPY_RATE=256
+CONFIG_LRNG_SHA256=y
+# CONFIG_LRNG_KCAPI_IF is not set
+# CONFIG_LRNG_HWRAND_IF is not set
+# CONFIG_LRNG_DEV_IF is not set
+# CONFIG_LRNG_RUNTIME_ES_CONFIG is not set
+CONFIG_LRNG_RCT_CUTOFF=31
+CONFIG_LRNG_APT_CUTOFF=325
 # CONFIG_LRNG_JENT is not set
 CONFIG_LRNG_CPU=y
+CONFIG_LRNG_CPU_FULL_ENT_MULTIPLIER=1
 CONFIG_LRNG_CPU_ENTROPY_RATE=8
-# CONFIG_LRNG_DRNG_SWITCH is not set
+# CONFIG_LRNG_SCHED is not set
+# CONFIG_LRNG_KERNEL_RNG is not set
+CONFIG_LRNG_DRNG_CHACHA20=y
+# CONFIG_LRNG_SWITCH_HASH is not set
+# CONFIG_LRNG_SWITCH_DRNG is not set
+CONFIG_LRNG_DFLT_DRNG_CHACHA20=y
+# CONFIG_LRNG_DFLT_DRNG_DRBG is not set
+# CONFIG_LRNG_DFLT_DRNG_KCAPI is not set
 # CONFIG_LRNG_TESTING_MENU is not set
 # CONFIG_LRNG_SELFTEST is not set
 
@@ -532,6 +539,9 @@ CONFIG_LRNG_CPU_ENTROPY_RATE=8
 # CONFIG_IR_SIR is not set
 # CONFIG_RC_XBOX_DVD is not set
 # CONFIG_IR_TOY is not set
+
+CONFIG_NFSD=y
+
 ' >>./target/linux/generic/config-5.10
 
 ### Shortcut-FE 部分 ###
