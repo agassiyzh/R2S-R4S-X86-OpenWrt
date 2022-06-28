@@ -95,12 +95,16 @@ mkdir package/network/config/firewall4/patches
 wget 'https://git.openwrt.org/?p=project/firewall4.git;a=patch;h=38423fae' -O package/network/config/firewall4/patches/990-unconditionally-allow-ct-status-dnat.patch
 #wget -P package/network/config/firewall4/patches/ https://github.com/wongsyrone/lede-1/raw/master/package/network/config/firewall4/patches/999-01-firewall4-add-fullcone-support.patch
 #sed -i 's/-1,3 +1,5/-2,3 +2,5/g' package/network/config/firewall4/patches/999-01-firewall4-add-fullcone-support.patch
-wget -P package/network/config/firewall4/patches/ https://github.com/immortalwrt/immortalwrt/raw/master/package/network/config/firewall4/patches/001-firewall4-add-support-for-fullcone-nat.patch
-mkdir package/libs/libnftnl/patches
-wget -P package/libs/libnftnl/patches/ https://github.com/immortalwrt/immortalwrt/raw/master/package/libs/libnftnl/patches/001-libnftnl-add-fullcone-expression-support.patch
-sed -i '/PKG_LICENSE_FILES/a PKG_FIXUP:=autoreconf' package/libs/libnftnl/Makefile
-mkdir package/network/utils/nftables/patches
-wget -P package/network/utils/nftables/patches/ https://github.com/immortalwrt/immortalwrt/raw/master/package/network/utils/nftables/patches/002-nftables-add-fullcone-expression-support.patch
+wget -P package/network/config/firewall4/patches/ https://raw.githubusercontent.com/immortalwrt/immortalwrt/ce3b9cc/package/network/config/firewall4/patches/001-firewall4-add-support-for-fullcone-nat.patch
+#mkdir package/libs/libnftnl/patches
+#wget -P package/libs/libnftnl/patches/ https://github.com/immortalwrt/immortalwrt/raw/master/package/libs/libnftnl/patches/001-libnftnl-add-fullcone-expression-support.patch
+#sed -i '/PKG_LICENSE_FILES/a PKG_FIXUP:=autoreconf' package/libs/libnftnl/Makefile
+rm -rf ./package/libs/libnftnl
+svn export https://github.com/wongsyrone/lede-1/trunk/package/libs/libnftnl package/libs/libnftnl
+#mkdir package/network/utils/nftables/patches
+#wget -P package/network/utils/nftables/patches/ https://github.com/immortalwrt/immortalwrt/raw/master/package/network/utils/nftables/patches/002-nftables-add-fullcone-expression-support.patch
+rm -rf ./package/network/utils/nftables
+svn export https://github.com/wongsyrone/lede-1/trunk/package/network/utils/nftables package/network/utils/nftables
 # FW3
 mkdir package/network/config/firewall/patches
 wget -P package/network/config/firewall/patches/ https://github.com/immortalwrt/immortalwrt/raw/openwrt-21.02/package/network/config/firewall/patches/fullconenat.patch
@@ -225,10 +229,15 @@ svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-auto
 # Boost 通用即插即用
 svn export https://github.com/QiuSimons/slim-wrt/branches/main/slimapps/application/luci-app-boostupnp package/new/luci-app-boostupnp
 rm -rf ./feeds/packages/net/miniupnpd
-git clone -b main --depth 1 https://github.com/msylgj/miniupnpd.git feeds/packages/net/miniupnpd
+svn export https://github.com/x-wrt/packages/trunk/net/miniupnpd feeds/packages/net/miniupnpd
+#git clone -b main --depth 1 https://github.com/msylgj/miniupnpd.git feeds/packages/net/miniupnpd
 pushd feeds/packages
 wget -qO - https://github.com/openwrt/packages/commit/785bbcb.patch | patch -p1
 popd
+rm -rf ./feeds/luci/applications/luci-app-upnp
+svn export https://github.com/x-wrt/luci/trunk/applications/luci-app-upnp feeds/luci/applications/luci-app-upnp
+#git clone -b main --depth 1 https://github.com/msylgj/luci-app-upnp feeds/luci/applications/luci-app-upnp
+#svn export https://github.com/kode54/luci/branches/upnp-nftables/applications/luci-app-upnp feeds/luci/applications/luci-app-upnp
 #svn export https://github.com/coolsnowwolf/packages/trunk/net/miniupnpd feeds/packages/net/miniupnpd
 # ChinaDNS
 git clone -b luci --depth 1 https://github.com/QiuSimons/openwrt-chinadns-ng.git package/new/luci-app-chinadns-ng
