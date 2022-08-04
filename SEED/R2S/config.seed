@@ -139,7 +139,6 @@ CONFIG_PACKAGE_kmod-shortcut-fe-cm=y
 CONFIG_PACKAGE_luci-app-shadowsocks-libev=y
 
 ### THEME ###
-CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-theme-bootstrap=y
 
 ### RESET ###
