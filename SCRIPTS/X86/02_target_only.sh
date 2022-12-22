@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sed -i 's/O3 -Wl,--gc-sections/O2 -Wl,--gc-sections -mtune=goldmont-plus/g' include/target.mk
+sed -i 's/O2 -Wl,--gc-sections/O2 -Wl,--gc-sections -mtune=goldmont-plus/g' include/target.mk
 
 rm -rf ./package/kernel/linux/modules/video.mk
 rm -rf ./target/linux/x86/64/config-5.10
